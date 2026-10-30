@@ -1,0 +1,43 @@
+/* Design tokens: colours, type, spacing, radii, shadows, motion, z-index. Change them here and the whole site follows. */
+:root {
+  --forest: #123d35; --forest-2: #1b5247; --ivory: #faf8f3; --sand: #ede5d8; --saffron: #e89a43; --saffron-2: #c97d27;  --logo: var(--forest); --logo-accent: var(--saffron-2);
+  --charcoal: #202724; --sage: #8fa79a; --white: #ffffff;
+
+  --bg: var(--ivory); --surface: var(--white); --surface-2: #f3efe6; --text: var(--charcoal); --muted: #5b6862;
+  --line: #e1d9c9; --brand: var(--forest); --brand-contrast: #fff; --accent: var(--saffron); --accent-text: #3a2406;
+  --link: #1b5247; --danger: #b3261e; --ok: #1d6b45; --warn-bg: #fff2d9; --warn-line: #e6c27c;
+  --overlay: rgba(10, 30, 26, .55);
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --fs-xs: .78rem; --fs-sm: .9rem; --fs-md: 1rem; --fs-lg: 1.15rem; --fs-xl: 1.5rem; --fs-2xl: clamp(1.7rem, 3vw, 2.2rem);
+  --fs-hero: clamp(2.4rem, 6vw, 4.4rem);
+
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem; --sp-5: 1.5rem; --sp-6: 2rem; --sp-7: 3rem; --sp-8: 4.5rem;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 22px; --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(18, 61, 53, .08), 0 1px 3px rgba(18, 61, 53, .06);
+  --shadow-2: 0 6px 20px rgba(18, 61, 53, .12); --shadow-3: 0 18px 44px rgba(18, 61, 53, .2);
+  --t-fast: 150ms ease; --t-med: 280ms cubic-bezier(.2, .7, .2, 1);
+  --z-nav: 30; --z-drawer: 40; --z-modal: 60; --z-toast: 70;
+  --bp-sm: 640px; --bp-md: 900px; --bp-lg: 1200px;
+  --container: 1200px;
+  --map-line: #111111;
+}
+[data-theme="dark"] {
+  --bg: #0e1613; --surface: #16211d; --surface-2: #1c2a25; --text: #ece9e0; --muted: #a2b0a9; --line: #2a3a34;
+  --brand: #7fb8a5; --brand-contrast: #0b1512; --accent: #f0a85a; --accent-text: #2b1a05; --link: #8fd0ba;
+  --warn-bg: #3a2f17; --warn-line: #6b5522; --shadow-1: 0 1px 2px rgba(0,0,0,.4); --shadow-2: 0 6px 20px rgba(0,0,0,.4);
+  --shadow-3: 0 18px 44px rgba(0,0,0,.5); --sand: #243530; --danger: #ff8a80; --ok: #7fd1a1;
+  --logo: #f4efe3; --logo-accent: #f0a85a;
+  --map-line: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1613; --surface: #16211d; --surface-2: #1c2a25; --text: #ece9e0; --muted: #a2b0a9; --line: #2a3a34;
+    --brand: #7fb8a5; --brand-contrast: #0b1512; --accent: #f0a85a; --accent-text: #2b1a05; --link: #8fd0ba;
+    --warn-bg: #3a2f17; --warn-line: #6b5522; --shadow-1: 0 1px 2px rgba(0,0,0,.4); --shadow-2: 0 6px 20px rgba(0,0,0,.4);
+    --shadow-3: 0 18px 44px rgba(0,0,0,.5); --sand: #243530; --danger: #ff8a80; --ok: #7fd1a1;
+    --logo: #f4efe3; --logo-accent: #f0a85a;
+    --map-line: #ffffff;
+  }
+}
