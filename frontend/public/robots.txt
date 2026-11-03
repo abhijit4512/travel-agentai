@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+# Replace with your real domain. The backend serves the sitemap at /api/sitemap.xml
+Sitemap: https://YOUR-DOMAIN.example/api/sitemap.xml
