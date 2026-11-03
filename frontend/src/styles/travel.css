@@ -1,0 +1,18 @@
+/* Cars, hotels, transport, memories */
+.nav-drop { position: relative; } .nav-drop-panel { display: none; position: absolute; top: 100%; left: 0; min-width: 220px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-3); padding: 6px; z-index: 40; }
+.nav-drop-panel.open { display: grid; } .nav-drop-panel a { color: var(--text) !important; padding: .55rem .8rem; border-radius: var(--r-sm); } .nav-drop-panel a:hover { background: var(--surface-2); }
+.nav.over-hero:not(.scrolled) .nav-drop-panel a { color: var(--text) !important; }
+@media (max-width: 960px) { .nav-drop-panel { position: static; display: grid; box-shadow: none; border: 0; background: none; padding-left: 1rem; } .nav-drop-panel:not(.open) { display: none; } }
+.vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--sp-3); }
+.vcard { display: flex; flex-direction: column; gap: 3px; text-align: left; background: var(--surface); border: 2px solid var(--line); border-radius: var(--r-md); padding: var(--sp-3); cursor: pointer; font: inherit; color: var(--text); transition: border-color var(--t-fast), transform var(--t-fast); }
+.vcard:hover { transform: translateY(-2px); } .vcard.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); } .vicon { color: var(--accent); }
+.cmp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--sp-4); } .cost.best { border: 2px solid var(--ok); } .cost h3 { margin-top: .3rem; } .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--text); padding-top: .5rem; margin: .75rem 0 0; } .total b { font-family: var(--font-display); font-size: 1.6rem; }
+.ext-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; } .ext-list a { display: inline-flex; align-items: center; gap: .4rem; }
+.nearby { list-style: none; padding: 0; margin: 0 0 .5rem; display: grid; gap: 8px; } .nearby li { display: flex; justify-content: space-between; gap: .75rem; align-items: center; padding: .5rem 0; border-bottom: 1px solid var(--line); }
+.hotels { list-style: none; padding: 0; display: grid; gap: var(--sp-3); } .hotels .card h3 { margin: 0; font-size: 1.1rem; }
+.drop { display: grid; justify-items: center; gap: .5rem; text-align: center; border: 2px dashed var(--line); border-radius: var(--r-md); padding: var(--sp-5); background: var(--surface-2); }
+.progress { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-top: 4px; } .progress i { display: block; height: 100%; background: var(--accent); transition: width var(--t-fast); }
+.mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--sp-3); } .mitem { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; display: flex; flex-direction: column; }
+.mimg { padding: 0; border: 0; background: none; cursor: zoom-in; aspect-ratio: 4 / 3; overflow: hidden; } .mimg img, .mitem video { width: 100%; height: 100%; object-fit: cover; display: block; } .mitem video { aspect-ratio: 4 / 3; background: #000; }
+.mitem figcaption { padding: .5rem .6rem; display: grid; gap: 4px; font-size: var(--fs-sm); } .mitem figcaption input { min-height: 34px; padding: .3rem .5rem; font-size: var(--fs-sm); }
+.dest-img.placeholder img { width: 100%; height: 100%; object-fit: cover; }
