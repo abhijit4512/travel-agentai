@@ -30,6 +30,25 @@ def test_chat_demo_mode(client):
     assert r.status_code == 200 and body["mode"] == "demo" and body["notice"]
 
 
+def test_chat_uses_selected_crewai_provider(client, monkeypatch):
+    from types import SimpleNamespace
+
+    from app.api import routes
+
+    monkeypatch.setattr(routes, "settings", SimpleNamespace(agent_provider="crewai", gemini_enabled=True))
+    monkeypatch.setattr(routes.crewai_agent, "crewai_available", lambda: True)
+    monkeypatch.setattr(routes.crewai_agent, "run_agent",
+                        lambda message, session_id: {"reply": "Munnar is a good choice.", "destination_ids": ["munnar"]})
+
+    health = client.get("/api/health")
+    response = client.post("/api/chat", json={"message": "Plan a trip to Munnar"})
+
+    assert health.json()["agent_mode"] == "crewai"
+    assert response.status_code == 200
+    assert response.json()["mode"] == "crewai"
+    assert response.json()["destination_ids"] == ["munnar"]
+
+
 def test_chat_validation(client):
     r = client.post("/api/chat", json={"message": ""})
     assert r.status_code == 422 and r.json()["error"]["code"] == "validation_error"

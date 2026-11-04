@@ -57,7 +57,7 @@ export interface Plan {
   request: PlanRequest; generated_at: string;
 }
 export interface ChatResponse {
-  reply: string; session_id: string; mode: "adk" | "demo"; destination_ids: string[];
+  reply: string; session_id: string; mode: "adk" | "crewai" | "demo"; destination_ids: string[];
   follow_ups: string[]; notice: string | null;
 }
 export interface TripRecord { id: number; title: string; created_at: string; plan: Plan }

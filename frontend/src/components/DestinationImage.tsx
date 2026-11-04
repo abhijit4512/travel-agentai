@@ -5,6 +5,7 @@ import type { Photo } from "../types";
 interface Props {
   id: string;
   name: string;
+  searchName?: string;
   index?: number;
   className?: string;
   eager?: boolean;
@@ -14,11 +15,12 @@ interface Props {
 export default function DestinationImage({
   id,
   name,
+  searchName,
   index = 0,
   className = "",
   eager = false,
   onPhoto,
-}: Props) {
+}: Props)  {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(eager);
   const [photo, setPhoto] = useState<Photo | null>(null);
@@ -56,7 +58,12 @@ export default function DestinationImage({
     setState("loading");
     setBroken(false);
 
-    api.photos(id, Math.max(1, index + 1), attempt > 0, name)
+    api.photos(
+  id,
+  Math.max(1, index + 1),
+  attempt > 0,
+  searchName || name
+)
       .then((response) => {
         if (!alive) return;
         if (response.status === "unavailable") {

@@ -72,6 +72,7 @@ function StateCard({ state }: { state: StateInfo }) {
   <DestinationImage
     id={`state-feature-${state.slug}`}
     name={featured.place}
+    searchName={`${featured.place}, ${featured.imageTags}`}
     className="statecard-destination-image"
   />
 </div>
@@ -109,16 +110,7 @@ export default function States() {
 
       <section className="states-hero">
         <div className="states-hero-content">
-          <span className="states-eyebrow">DISCOVER INDIA</span>
 
-          <h1>
-            Every state and <em>union territory</em>
-          </h1>
-
-          <p>
-            Pick a place to discover its iconic temples, forests,
-            beaches, hills and unforgettable heritage.
-          </p>
         </div>
       </section>
 

@@ -16,7 +16,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     session_id: str
-    mode: Literal["adk", "demo"]
+    mode: Literal["adk", "crewai", "demo"]
     destination_ids: list[str] = Field(default_factory=list)
     follow_ups: list[str] = Field(default_factory=list)
     notice: str | None = None

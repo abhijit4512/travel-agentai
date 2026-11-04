@@ -184,6 +184,23 @@ DESTINATIONS: list[dict[str, Any]] = [
         ("Batasia Loop and Ghum Monastery", 2, 50, 27.03, 88.25, ["heritage", "spiritual"])],
        ["Momos and thukpa", "Darjeeling tea tasting"],
        ["Sunrise views depend on weather; keep a flexible morning."]),
+      _d(
+    "havelock-island",
+    "Havelock Island",
+    "Andaman and Nicobar Islands",
+    11.97, 92.99,
+    ["beach", "island", "nature", "scuba diving", "relaxation"],
+    "Beautiful island known for Radhanagar Beach, turquoise waters and coral reefs.",
+    900, 1500, 2000, 4000,
+    "Oct-May",
+    [
+        ("Radhanagar Beach", 3, 0, 11.98, 92.95, ["beach"]),
+        ("Elephant Beach", 3, 100, 12.00, 92.97, ["beach", "adventure"]),
+        ("Kalapathar Beach", 2, 0, 11.94, 93.00, ["beach"]),
+    ],
+    ["Fresh seafood", "Coconut water", "Local seafood thali"],
+    ["Check ferry schedules before planning island transfers."]
+),
 ]
 
 BY_ID: dict[str, dict[str, Any]] = {d["id"]: d for d in DESTINATIONS}

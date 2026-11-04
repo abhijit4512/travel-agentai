@@ -4,12 +4,13 @@ from __future__ import annotations
 import logging
 import sqlite3
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 
-from ..agents import demo_agent, travel_agent
+from ..agents import crewai_agent, demo_agent, travel_agent
 from ..config import settings
 from ..database import db
 from ..schemas.schemas import (AuthResponse, ChatRequest, ChatResponse, LoginRequest, RegisterRequest,
@@ -22,10 +23,19 @@ log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", dependencies=[Depends(rate_limit)])
 
 
+def _active_agent_mode() -> Literal["demo", "adk", "crewai"]:
+    if not settings.gemini_enabled:
+        return "demo"
+    if settings.agent_provider == "crewai":
+        return "crewai" if crewai_agent.crewai_available() else "demo"
+    return "adk" if travel_agent.adk_available() else "demo"
+
+
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok", "agent_mode": "adk" if settings.gemini_enabled and travel_agent.adk_available() else "demo",
-            "adk_installed": travel_agent.adk_available(), "gemini_key_set": settings.gemini_enabled,
+    return {"status": "ok", "agent_mode": _active_agent_mode(),
+            "adk_installed": travel_agent.adk_available(), "crewai_installed": crewai_agent.crewai_available(),
+            "gemini_key_set": settings.gemini_enabled,
             "photos_provider": "unsplash", "weather_provider": "open-meteo"}
 
 
@@ -65,16 +75,20 @@ def destination_weather(destination_id: str, days: int = Query(7, ge=1, le=16)) 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(body: ChatRequest) -> ChatResponse:
     session_id = body.session_id or uuid.uuid4().hex
-    if settings.gemini_enabled and travel_agent.adk_available():
+    mode = _active_agent_mode()
+    if mode in ("adk", "crewai"):
         try:
-            out = await travel_agent.run_agent(body.message, session_id)
-            return ChatResponse(reply=out["reply"], session_id=session_id, mode="adk",
+            if mode == "adk":
+                out = await travel_agent.run_agent(body.message, session_id)
+            else:
+                out = await run_in_threadpool(crewai_agent.run_agent, body.message, session_id)
+            return ChatResponse(reply=out["reply"], session_id=session_id, mode=mode,
                                 destination_ids=out["destination_ids"],
                                 follow_ups=["Show the day-by-day plan", "Make it cheaper", "What is the weather like?"])
         except Exception as exc:  # noqa: BLE001 - logged, then falls back visibly (never silent)
-            log.exception("ADK agent failed")
+            log.exception("%s agent failed", mode.upper())
             fallback = await run_in_threadpool(demo_agent.reply_to, body.message)
-            fallback["notice"] = f"The AI agent failed ({type(exc).__name__}), so this is a demo-mode reply."
+            fallback["notice"] = f"The {mode.upper()} agent failed ({type(exc).__name__}), so this is a demo-mode reply."
             return ChatResponse(session_id=session_id, mode="demo", **fallback)
     out = await run_in_threadpool(demo_agent.reply_to, body.message)
     return ChatResponse(session_id=session_id, mode="demo", **out)
