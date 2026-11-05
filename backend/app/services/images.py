@@ -19,7 +19,6 @@ load_dotenv()
 log = logging.getLogger(__name__)
 
 UNSPLASH_API = "https://api.unsplash.com/search/photos"
-COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 
 UNSPLASH_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "").strip()
 
@@ -129,6 +128,7 @@ def save_selection(
     return get_selected(destination_id)
 
 
+
 async def search_candidates(query: str, limit: int = 8):
     query = query.strip()
 
@@ -140,196 +140,93 @@ async def search_candidates(query: str, limit: int = 8):
     items = []
     errors = []
 
-    # -------------------------------------------------
-    # 1. UNSPLASH - PRIMARY IMAGE PROVIDER
-    # -------------------------------------------------
-
-    if UNSPLASH_KEY:
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(
-                    UNSPLASH_API,
-                    headers={
-                        "Authorization": f"Client-ID {UNSPLASH_KEY}",
-                        "Accept-Version": "v1",
-                    },
-                    params={
-                        "query": query,
-                        "per_page": limit,
-                        "orientation": "landscape",
-                        "content_filter": "high",
-                    },
-                )
-
-                response.raise_for_status()
-
-            for photo in response.json().get("results", []):
-                user = photo.get("user") or {}
-                links = photo.get("links") or {}
-                user_links = user.get("links") or {}
-                urls = photo.get("urls") or {}
-
-                # Use the smaller image for destination cards.
-                # Fall back to regular if small is unavailable.
-                image_url = urls.get("small") or urls.get("regular")
-
-                if not image_url:
-                    continue
-
-                def track(url):
-                    return (
-                        url
-                        + ("&" if "?" in url else "?")
-                        + "utm_source=travel_agent_india"
-                        + "&utm_medium=referral"
-                    )
-
-                items.append({
-                    "url": image_url,
-                    "alt": photo.get("alt_description") or query,
-                    "attribution": user.get(
-                        "name",
-                        "Unsplash photographer",
-                    ),
-                    "attribution_uri": track(
-                        user_links.get(
-                            "html",
-                            "https://unsplash.com",
-                        )
-                    ),
-                    "provider": "Unsplash",
-                    "license": "Unsplash License",
-                    "license_uri": "https://unsplash.com/license",
-                    "photo_uri": track(
-                        links.get(
-                            "html",
-                            "https://unsplash.com",
-                        )
-                    ),
-                    "source_id": photo.get("id", ""),
-                })
-
-        except httpx.HTTPError as e:
-            log.warning("Unsplash search error: %s", e)
-            errors.append("Unsplash unavailable.")
-
-    else:
-        errors.append(
-            "Unsplash key not configured; showing Wikimedia results."
-        )
-
-    # If Unsplash returned enough images, do not call Wikimedia.
-    # This avoids the unnecessary 403 requests.
-    if len(items) >= limit:
+    if not UNSPLASH_KEY:
         return {
-            "items": items,
-            "errors": errors,
+            "items": [],
+            "errors": ["Unsplash API key is not configured."]
         }
-
-    # -------------------------------------------------
-    # 2. WIKIMEDIA - FALLBACK IMAGE PROVIDER
-    # -------------------------------------------------
 
     try:
-        params = {
-            "action": "query",
-            "format": "json",
-            "formatversion": "2",
-            "generator": "search",
-            "gsrsearch": f"filetype:bitmap {query}",
-            "gsrnamespace": "6",
-            "gsrlimit": limit - len(items),
-            "prop": "imageinfo",
-            "iiprop": "url|extmetadata",
-            "iiurlwidth": "640",
-        }
-
-        async with httpx.AsyncClient(
-            timeout=httpx.Timeout(4.0),
-            headers={
-                "User-Agent": (
-                    "YatraAI/1.0 (travel information website)"
-                )
-            },
-        ) as client:
-
+        async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(
-                COMMONS_API,
-                params=params,
+                UNSPLASH_API,
+                headers={
+                    "Authorization": f"Client-ID {UNSPLASH_KEY}",
+                    "Accept-Version": "v1",
+                },
+                params={
+                    "query": query,
+                    "per_page": limit,
+                    "orientation": "landscape",
+                    "content_filter": "high",
+                },
             )
 
             response.raise_for_status()
+            data = response.json()
 
-        pages = (
-            response.json()
-            .get("query", {})
-            .get("pages", [])
-        )
+        for photo in data.get("results", []):
+            user = photo.get("user") or {}
+            links = photo.get("links") or {}
+            user_links = user.get("links") or {}
+            urls = photo.get("urls") or {}
 
-        for page in pages:
-            info = (page.get("imageinfo") or [{}])[0]
-            metadata = info.get("extmetadata") or {}
-
-            def metadata_value(key, default=""):
-                return str(
-                    (metadata.get(key) or {}).get("value")
-                    or default
-                )
-
-            image_url = (
-                info.get("thumburl")
-                or info.get("url")
-            )
+            image_url = urls.get("small") or urls.get("regular")
 
             if not image_url:
                 continue
 
-            artist = re.sub(
-                r"<[^>]+>",
-                "",
-                metadata_value(
-                    "Artist",
-                    "Wikimedia Commons contributor",
-                ),
-            )
-
-            page_url = info.get(
-                "descriptionurl",
-                "https://commons.wikimedia.org/",
-            )
+            def track(url):
+                return (
+                    url
+                    + ("&" if "?" in url else "?")
+                    + "utm_source=travel_agent_india"
+                    + "&utm_medium=referral"
+                )
 
             items.append({
                 "url": image_url,
-                "alt": page.get(
-                    "title",
-                    query,
-                ).replace("File:", ""),
-                "attribution": artist,
-                "attribution_uri": page_url,
-                "provider": "Wikimedia Commons",
-                "license": metadata_value(
-                    "LicenseShortName",
-                    "See file page for licence",
+                "alt": photo.get("alt_description") or query,
+                "attribution": user.get(
+                    "name",
+                    "Unsplash photographer"
                 ),
-                "license_uri": metadata_value(
-                    "LicenseUrl",
-                    page_url,
+                "attribution_uri": track(
+                    user_links.get(
+                        "html",
+                        "https://unsplash.com"
+                    )
                 ),
-                "photo_uri": page_url,
-                "source_id": str(
-                    page.get("pageid")
-                    or page.get("title", "")
+                "provider": "Unsplash",
+                "license": "Unsplash License",
+                "license_uri": "https://unsplash.com/license",
+                "photo_uri": track(
+                    links.get(
+                        "html",
+                        "https://unsplash.com"
+                    )
                 ),
+                "source_id": photo.get("id", ""),
             })
 
-    except httpx.HTTPError as e:
-        log.warning("Wikimedia search error: %s", e)
-        errors.append("Wikimedia unavailable.")
+    except httpx.HTTPStatusError as e:
+        log.warning(
+            "Unsplash API returned HTTP %s",
+            e.response.status_code
+        )
+        errors.append(
+            f"Unsplash API error: HTTP {e.response.status_code}"
+        )
+
+    except (httpx.HTTPError, ValueError) as e:
+        log.warning("Unsplash search error: %s", e)
+        errors.append("Unable to retrieve images from Unsplash.")
 
     return {
         "items": items,
         "errors": errors,
     }
+
 
 
 async def get_photos(
@@ -451,10 +348,11 @@ async def get_photos(
         photos = found["items"][:max_photos]
 
         result = {
-            "status": "ok" if photos else "no_photos",
-            "destination_id": destination_id,
-            "photos": photos,
-        }
+    "status": "ok" if photos else "no_photos",
+    "destination_id": destination_id,
+    "photos": photos,
+    "errors": found["errors"],
+}
 
         # -------------------------------------------------
         # 6. CACHE SUCCESSFUL RESULTS
